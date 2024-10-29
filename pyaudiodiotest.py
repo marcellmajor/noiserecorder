@@ -18,7 +18,8 @@ wav_output_filename = 'test2.wav' # name of .wav file
 period_seconds = 60 * 5
 period_max = 0
 
-min_volume = 115
+min_volume = 850
+volume_max_threshold = 2000
 max_volume = 0
 file_counter = 0
 
@@ -59,14 +60,13 @@ while(True):
         vol=max(data_chunk)
         if( vol > min_volume ):
             recorded_volume = vol
-            file_counter += 1
             record_file = True
         if( vol > max_volume ):
             max_volume = vol
-        if( period_max < vol):
+        if( (period_max < vol) and (vol < volume_max_threshold) ):
             period_max = vol
 
-        print( "{} - {}     ".format(str(vol),str(max_volume)), end='\r' )
+        print( "{} - {} - {}     ".format(str(vol),str(period_max),str(max_volume)), end='\r' )
         frames.append(data)
 
     # stop the stream, close it, and terminate the pyaudio instantiation
@@ -83,7 +83,8 @@ while(True):
 
     print("                    finished recording    ", end='\r')
     
-    if( record_file ):
+    if( record_file and ( recorded_volume < volume_max_threshold ) ):
+        file_counter += 1
         record_wavfile( recorded_volume, file_counter )
         # pass
 
